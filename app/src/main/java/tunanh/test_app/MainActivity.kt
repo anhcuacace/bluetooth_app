@@ -1,6 +1,5 @@
 package tunanh.test_app
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -12,8 +11,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import tunanh.test_app.ui.theme.Test_appTheme
-@SuppressLint("CustomSplashScreen")
-class SplashActivity : ComponentActivity() {
+
+class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -23,7 +22,7 @@ class SplashActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting("Android")
+                    Greeting2("Android")
                 }
             }
         }
@@ -31,12 +30,8 @@ class SplashActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Surface {
-
-    }
+fun Greeting2(name: String, modifier: Modifier = Modifier) {
     Text(
-
         text = "Hello $name!",
         modifier = modifier
     )
@@ -44,8 +39,8 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
+fun GreetingPreview2() {
     Test_appTheme {
-        Greeting("Android")
+        Greeting2("Android")
     }
 }
