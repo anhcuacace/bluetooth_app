@@ -103,53 +103,53 @@ fun <T> Context.getPreferenceStateBlocking(pref: PreferenceStore.Preference<T>):
     return flow.collectAsState(runBlocking { flow.first() })
 }
 
-@Composable
-fun <T> rememberPreference(
-    pref: PreferenceStore.Preference<T>,
-): MutableState<T> {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    val state = context.getPreferenceStateBlocking(pref)
-
-    return remember {
-        object : MutableState<T> {
-            override var value: T
-                get() = state.value
-                set(value) {
-                    scope.launch {
-                        context.setPreference(pref, value)
-                    }
-                }
-
-            override fun component1(): T = value
-            override fun component2(): (T) -> Unit = { value = it }
-        }
-    }
-}
-
-@Composable
-fun <T> rememberPreferenceNull(
-    pref: PreferenceStore.Preference<T>,
-): MutableState<T?> {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    val state = context.getPreferenceState(pref)
-
-    return remember {
-        object : MutableState<T?> {
-            override var value: T?
-                get() = state.value
-                set(value) {
-                    scope.launch {
-                        context.setPreference(pref, value!!)
-                    }
-                }
-
-            override fun component1(): T? = value
-            override fun component2(): (T?) -> Unit = { value = it }
-        }
-    }
-}
+//@Composable
+//fun <T> rememberPreference(
+//    pref: PreferenceStore.Preference<T>,
+//): MutableState<T> {
+//    val context = LocalContext.current
+//    val scope = rememberCoroutineScope()
+//    val state = context.getPreferenceStateBlocking(pref)
+//
+//    return remember {
+//        object : MutableState<T> {
+//            override var value: T
+//                get() = state.value
+//                set(value) {
+//                    scope.launch {
+//                        context.setPreference(pref, value)
+//                    }
+//                }
+//
+//            override fun component1(): T = value
+//            override fun component2(): (T) -> Unit = { value = it }
+//        }
+//    }
+//}
+//
+//@Composable
+//fun <T> rememberPreferenceNull(
+//    pref: PreferenceStore.Preference<T>,
+//): MutableState<T?> {
+//    val context = LocalContext.current
+//    val scope = rememberCoroutineScope()
+//    val state = context.getPreferenceState(pref)
+//
+//    return remember {
+//        object : MutableState<T?> {
+//            override var value: T?
+//                get() = state.value
+//                set(value) {
+//                    scope.launch {
+//                        context.setPreference(pref, value!!)
+//                    }
+//                }
+//
+//            override fun component1(): T? = value
+//            override fun component2(): (T?) -> Unit = { value = it }
+//        }
+//    }
+//}
 
 @Composable
 fun <T> rememberPreferenceDefault(

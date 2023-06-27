@@ -7,7 +7,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 
-// adapted from: https://medium.com/@mahdizareeii/handling-app-lifecycle-events-in-jetpack-compose-d3b7f526514b
+
 @Composable
 fun ComposableLifecycle(
     lifeCycleOwner: LifecycleOwner = LocalLifecycleOwner.current,

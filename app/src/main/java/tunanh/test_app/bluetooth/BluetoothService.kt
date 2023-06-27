@@ -20,8 +20,9 @@ class BluetoothService : Service() {
     companion object {
         private const val CHANNEL_ID = "bt_hid_service"
 
-        const val ACTION_REGISTER = "register"
-        const val ACTION_STOP = "stop"
+        private const val ACTION_REGISTER = "register"
+        private const val ACTION_STOP = "stop"
+        private const val notificationId = 1
     }
 
     private val binder = LocalBinder()
@@ -54,6 +55,9 @@ class BluetoothService : Service() {
             }
         } else if (intent?.action == ACTION_STOP) {
             controller.unregister()
+            val notificationManager =
+                getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.cancel(notificationId)
             stopForeground(STOP_FOREGROUND_REMOVE)
             stopSelf()
             return START_NOT_STICKY
@@ -85,7 +89,7 @@ class BluetoothService : Service() {
             .build()
         notification.flags = Notification.FLAG_NO_CLEAR or Notification.FLAG_ONGOING_EVENT
 
-        startForeground(1, notification)
+        startForeground(notificationId, notification)
 
         return START_STICKY
     }

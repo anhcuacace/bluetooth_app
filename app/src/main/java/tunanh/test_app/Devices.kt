@@ -36,6 +36,7 @@ import tunanh.test_app.ui.theme.Typography
 fun Devices() = with(viewModel<DevicesViewModel>()) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val controller = LocalController.current
+    val context = LocalContext.current
 //    val navigation = LocalNavigation.current
 
     Scaffold(
@@ -65,7 +66,9 @@ fun Devices() = with(viewModel<DevicesViewModel>()) {
                             "Refresh"
                         )
                     }
-                    Dropdown()
+                    IconButton(onClick = { (context as MainActivity).finishAfterTransition() }) {
+                        Icon(imageVector = Icons.Filled.ExitToApp, contentDescription = "exit")
+                    }
                 },
                 scrollBehavior = scrollBehavior
             )

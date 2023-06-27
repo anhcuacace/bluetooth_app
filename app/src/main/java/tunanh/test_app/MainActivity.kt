@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import tunanh.test_app.bluetooth.BluetoothController
 import tunanh.test_app.bluetooth.BluetoothService
+import tunanh.test_app.ui.theme.Test_appTheme
 
 val LocalController = staticCompositionLocalOf<BluetoothController> {
     error("No BluetoothController provided")
@@ -119,40 +120,40 @@ class MainActivity : ComponentActivity() {
         setContent {
 
             Surface(Modifier.fillMaxSize()) {
-
-
-                RequiresBluetoothPermission {
-                    bluetoothController?.let {
-                        CompositionLocalProvider(LocalController provides it) {
-                            NavGraph()
+                Test_appTheme {
+                    RequiresBluetoothPermission {
+                        bluetoothController?.let {
+                            CompositionLocalProvider(LocalController provides it) {
+                                NavGraph()
+                            }
                         }
-                    }
 
-                    ComposableLifecycle(LocalLifecycleOwner.current) { _, event ->
-                        when (event) {
-                            Lifecycle.Event.ON_CREATE -> {
-                                // Start and bind bluetooth service
-                                Intent(this@MainActivity, BluetoothService::class.java).let {
-                                    startForegroundService(it)
-                                    bindService(it, serviceConnection, BIND_AUTO_CREATE)
+                        ComposableLifecycle(LocalLifecycleOwner.current) { _, event ->
+                            when (event) {
+                                Lifecycle.Event.ON_CREATE -> {
+                                    // Start and bind bluetooth service
+                                    Intent(this@MainActivity, BluetoothService::class.java).let {
+                                        startForegroundService(it)
+                                        bindService(it, serviceConnection, BIND_AUTO_CREATE)
+                                    }
                                 }
-                            }
 
-                            Lifecycle.Event.ON_DESTROY -> {
-                                // Don't stop service if activity is being recreated due to a configuration change
-                                if (!isChangingConfigurations) {
-                                    // Unbind and stop bluetooth service
-                                    unbindService(serviceConnection)
-                                    stopService(
-                                        Intent(
-                                            this@MainActivity,
-                                            BluetoothService::class.java
+                                Lifecycle.Event.ON_DESTROY -> {
+                                    // Don't stop service if activity is being recreated due to a configuration change
+                                    if (!isChangingConfigurations) {
+                                        // Unbind and stop bluetooth service
+                                        unbindService(serviceConnection)
+                                        stopService(
+                                            Intent(
+                                                this@MainActivity,
+                                                BluetoothService::class.java
+                                            )
                                         )
-                                    )
+                                    }
                                 }
-                            }
 
-                            else -> {}
+                                else -> {}
+                            }
                         }
                     }
                 }

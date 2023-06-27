@@ -30,6 +30,9 @@ fun RequiresBluetoothPermission(
     if (Utils.isAndroidS()) {
         permissions.add(android.Manifest.permission.BLUETOOTH_SCAN)
         permissions.add(android.Manifest.permission.BLUETOOTH_CONNECT)
+        if (Utils.isTIRAMISU()) {
+            permissions.add(android.Manifest.permission.POST_NOTIFICATIONS)
+        }
     } else {
         permissions.add(android.Manifest.permission.BLUETOOTH)
         permissions.add(android.Manifest.permission.BLUETOOTH_ADMIN)

@@ -43,15 +43,15 @@ open class KeyboardSender(
 //        }
 //    }
 
-    private fun sendKey(key: Byte, modifier: Byte = 0, releaseKey: Boolean = true) {
-        report[0] = modifier
-        report[2] = key
-
-        sendReport(report)
-
-        if (releaseKey) {
-            report.fill(0)
-            sendReport(report)
-        }
-    }
+//    private fun sendKey(key: Byte, modifier: Byte = 0, releaseKey: Boolean = true) {
+//        report[0] = modifier
+//        report[2] = key
+//
+//        sendReport(report)
+//
+//        if (releaseKey) {
+//            report.fill(0)
+//            sendReport(report)
+//        }
+//    }
 }

@@ -116,44 +116,44 @@ class KeyTranslator(context: Context) {
     }
 
     // Translates a string into a list of keys using a template string
-    fun translateStringWithTemplate(
-        string: String,
-        locale: String,
-        templateString: String
-    ): List<Key> {
-        val keys = mutableListOf<Key>()
-        val templateRegex = Regex("\\{([A-Z0-9]+)\\}")
-
-        var startIdx = 0
-        templateRegex.findAll(templateString).forEach {
-            // Adds everything before the first template
-            val before = templateString.substring(startIdx, it.range.first)
-            keys.addAll(translateString(before, locale))
-
-            // Adds the template
-            val template = it.groupValues[1]
-            if (template == "CODE") {
-                keys.addAll(translateString(string, locale))
-            } else {
-                staticTemplates[template]?.let { t ->
-                    keys.addAll(t)
-                } ?: dynamicTemplates[template]?.let { t ->
-                    keys.addAll(t(locale))
-                } ?: Log.w(TAG, "Unknown template: $template")
-            }
-
-            startIdx = it.range.last + 1
-        }
-
-        // Adds the rest of the template
-        val after = templateString.substring(startIdx)
-        keys.addAll(translateString(after, locale))
-
-        return keys
-    }
+//    fun translateStringWithTemplate(
+//        string: String,
+//        locale: String,
+//        templateString: String
+//    ): List<Key> {
+//        val keys = mutableListOf<Key>()
+//        val templateRegex = Regex("\\{([A-Z0-9]+)\\}")
+//
+//        var startIdx = 0
+//        templateRegex.findAll(templateString).forEach {
+//            // Adds everything before the first template
+//            val before = templateString.substring(startIdx, it.range.first)
+//            keys.addAll(translateString(before, locale))
+//
+//            // Adds the template
+//            val template = it.groupValues[1]
+//            if (template == "CODE") {
+//                keys.addAll(translateString(string, locale))
+//            } else {
+//                staticTemplates[template]?.let { t ->
+//                    keys.addAll(t)
+//                } ?: dynamicTemplates[template]?.let { t ->
+//                    keys.addAll(t(locale))
+//                } ?: Log.w(TAG, "Unknown template: $template")
+//            }
+//
+//            startIdx = it.range.last + 1
+//        }
+//
+//        // Adds the rest of the template
+//        val after = templateString.substring(startIdx)
+//        keys.addAll(translateString(after, locale))
+//
+//        return keys
+//    }
 
     // Converts a normal string into a list of keys
-    fun translateString(string: String, locale: String): List<Key> {
+    private fun translateString(string: String, locale: String): List<Key> {
         val keys = mutableListOf<Key>()
 
         string.forEach {

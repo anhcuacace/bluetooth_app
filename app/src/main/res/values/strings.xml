@@ -32,9 +32,6 @@
     <string name="unpair_desc">Unpairing will remove the device from your paired devices list.</string>
     <string name="connect">Connect</string>
     <string name="unpair">Unpair</string>
-    <string name="reset_default">Reset to default?</string>
-    <string name="reset_default_desc">Are you sure you want to reset to default?</string>
-    <string name="reset">Reset</string>
     <string name="refresh">Refresh</string>
     <string name="cancel">Cancel</string>
     <string name="bluetooth_disabled">Bluetooth is disabled</string>
