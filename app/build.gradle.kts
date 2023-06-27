@@ -13,7 +13,7 @@ android {
 
     defaultConfig {
         applicationId = "tunanh.test_app"
-        minSdk = 26
+        minSdk = 28
         targetSdk = 33
         versionCode = 1
         versionName = "1.0"
@@ -57,7 +57,7 @@ dependencies {
 
 //    implementation(libs.kotlin.stdlib)
 //    implementation(libs.kotlinx.coroutines.android)
-
+    implementation(libs.app.compat)
     implementation(libs.core.ktx)
     implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.activity.compose)
@@ -66,6 +66,13 @@ dependencies {
     implementation(libs.ui.graphics)
     implementation(libs.ui.tooling.preview)
     implementation(libs.material3)
+    implementation(libs.material)
+    implementation(libs.material.icon)
+    implementation(libs.datastore.preferences)
+    implementation("com.google.accompanist:accompanist-permissions:0.30.1")
+    implementation("androidx.navigation:navigation-common-ktx:2.6.0")
+    implementation("androidx.navigation:navigation-runtime-ktx:2.6.0")
+    implementation("androidx.navigation:navigation-compose:2.6.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.espresso.core)
