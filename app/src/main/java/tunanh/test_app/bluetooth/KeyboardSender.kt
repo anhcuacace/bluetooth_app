@@ -3,7 +3,7 @@ package tunanh.test_app.bluetooth
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothHidDevice
-import android.util.Log
+import timber.log.Timber
 
 @SuppressLint("MissingPermission")
 open class KeyboardSender(
@@ -19,7 +19,7 @@ open class KeyboardSender(
 
     private fun sendReport(report: ByteArray) {
         if (!hidDevice.sendReport(host, Descriptor.ID, report)) {
-            Log.e(TAG, "Error sending keyboard report")
+            Timber.tag(TAG).e("Error sending keyboard report")
         }
     }
 

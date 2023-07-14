@@ -19,10 +19,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import tunanh.test_app.bluetooth.Devices
 
 object Routes {
     const val Devices = "Devices"
-//    const val Main = "Main"
+    const val Main = "Main"
 }
 
 val LocalNavigation = staticCompositionLocalOf<NavHostController> {
@@ -65,6 +66,9 @@ fun NavGraph() {
                         }
                     }
                 }
+            }
+            composable(Routes.Main) {
+                Main()
             }
 
 //            composable(Routes.Main) {

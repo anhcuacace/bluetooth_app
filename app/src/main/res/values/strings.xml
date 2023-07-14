@@ -41,4 +41,10 @@
     <string name="service_running">Service is running</string>
     <string name="proxy_waiting">Waiting for BT-Proxy to connect…</string>
     <string name="exit_confirm">Press back again to exit</string>
+    <string name="cardconnect_qa_post_url">https://qa.cardconnect.com</string>
+    <string name="cardconnect_prod_post_url">https://fts.cardconnect.com:6443</string>
+    <string name="title_activity_pre">PreActivity</string>
+    <string name="bluetooth">Bluetooth</string>
+    <string name="usb">Usb</string>
+    <string name="select_type_connection">Select connection type</string>
 </resources>

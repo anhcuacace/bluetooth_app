@@ -12,7 +12,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import tunanh.test_app.MainActivity
 import tunanh.test_app.R
 
 class BluetoothService : Service() {
@@ -64,7 +63,7 @@ class BluetoothService : Service() {
         }
 
         val pendingIntent =
-            Intent(this, MainActivity::class.java).let { notificationIntent ->
+            Intent(this, BluetoothActivity::class.java).let { notificationIntent ->
                 PendingIntent.getActivity(
                     this, 0, notificationIntent,
                     PendingIntent.FLAG_IMMUTABLE

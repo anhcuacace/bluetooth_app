@@ -7,7 +7,6 @@ import android.bluetooth.BluetoothHidDevice
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
 import android.content.Context
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -17,6 +16,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
+import timber.log.Timber
 import tunanh.test_app.PreferenceStore
 import tunanh.test_app.R
 import tunanh.test_app.getPreference
@@ -53,7 +54,7 @@ class BluetoothController(private val context: Context) {
 
     private val serviceListener = object : BluetoothProfile.ServiceListener {
         override fun onServiceConnected(profile: Int, proxy: BluetoothProfile) {
-            Log.d(TAG, "onServiceConnected")
+            Timber.tag(TAG).d("onServiceConnected")
 
             hostDevice = null
             hidDevice = proxy as? BluetoothHidDevice
@@ -76,7 +77,7 @@ class BluetoothController(private val context: Context) {
         }
 
         override fun onServiceDisconnected(profile: Int) {
-            Log.d(TAG, "onServiceDisconnected")
+            Timber.tag(TAG).d("onServiceDisconnected")
 
             hidDevice = null
             hostDevice = null
@@ -111,7 +112,7 @@ class BluetoothController(private val context: Context) {
 
             if (registered && autoConnectEnabled) {
                 if (pluggedDevice != null) {
-                    Log.d(TAG, "onAppStatusChanged: connecting with $pluggedDevice")
+                    Timber.tag(TAG).d("onAppStatusChanged: connecting with $pluggedDevice")
                     hidDevice?.connect(pluggedDevice)
                 } else {
                     hidDevice?.getDevicesMatchingConnectionStates(
@@ -122,7 +123,7 @@ class BluetoothController(private val context: Context) {
                             BluetoothProfile.STATE_DISCONNECTING
                         )
                     )?.firstOrNull()?.let {
-                        Log.d(TAG, "onAppStatusChanged: connecting with $it")
+                        Timber.tag(TAG).d("onAppStatusChanged: connecting with $it")
                         hidDevice?.connect(it)
                     }
                 }
@@ -130,8 +131,8 @@ class BluetoothController(private val context: Context) {
         }
     }
 
-    val currentDevice: BluetoothDevice?
-        get() = hostDevice
+//    val currentDevice: BluetoothDevice?
+//        get() = hostDevice
 
     val bluetoothEnabled: Boolean
         get() = bluetoothAdapter?.isEnabled ?: false
@@ -189,11 +190,96 @@ class BluetoothController(private val context: Context) {
     fun cancelScan() {
         bluetoothAdapter?.cancelDiscovery()
     }
+//    private val mSwiperControllerManager by lazy {  SwiperControllerManager().getInstance()}
+//
+//    private val swiperListener = object : SwiperControllerListener {
+//        override fun onTokenGenerated(p0: CCConsumerAccount?, p1: CCConsumerError?) {
+//            Timber.e("onTokenGenerated " + p0?.name)
+//        }
+//
+//        override fun onError(p0: SwiperError?) {
+//            Timber.e("onError " + p0?.exceptionMessage)
+//        }
+//
+//        override fun onSwiperReadyForCard() {
+//            Timber.e("onSwiperReadyForCard")
+//        }
+//
+//        override fun onSwiperConnected() {
+//            Timber.e("onSwiperConnected")
+//        }
+//
+//        override fun onSwiperDisconnected() {
+//            Timber.e("onSwiperDisconnected")
+//        }
+//
+//        override fun onBatteryState(p0: BatteryState?) {
+//            Timber.e("onBatteryState")
+//        }
+//
+//        override fun onStartTokenGeneration() {
+//            Timber.e("onStartTokenGeneration")
+//        }
+//
+//        override fun onLogUpdate(p0: String?) {
+//            Timber.e("onLogUpdate $p0")
+//        }
+//
+//        override fun onDeviceConfigurationUpdate(p0: String?) {
+//            Timber.e("onDeviceConfigurationUpdate $p0")
+//        }
+//
+//        override fun onConfigurationProgressUpdate(p0: Double) {
+//            Timber.e("onConfigurationProgressUpdate $p0")
+//        }
+//
+//        override fun onConfigurationComplete(p0: Boolean) {
+//            Timber.e("onConfigurationComplete $p0")
+//        }
+//
+//        override fun onTimeout() {
+//            Timber.e("onTimeout")
+//        }
+//
+//        override fun onLCDDisplayUpdate(p0: String?) {
+//            Timber.e("onLCDDisplayUpdate $p0")
+//        }
+//
+//        override fun onRemoveCardRequested() {
+//            Timber.e("onRemoveCardRequested")
+//        }
+//
+//        override fun onCardRemoved() {
+//            Timber.e("onCardRemoved")
+//        }
+//
+//        override fun onDeviceBusy() {
+//            Timber.e("onDeviceBusy")
+//        }
+//
+//    }
+//
+//    fun connectApi(device: BluetoothDevice){
+//        val api = CCConsumer.getInstance().api
+//        val deviceName = device.name
+//        val deviceHardwareAddress = device.address // MAC address
+//        device.createBond()
+//        Timber.e("$deviceName -- $deviceHardwareAddress")
+//        api.connectToDevice(device, context)
+//        mSwiperControllerManager.setMACAddress(deviceHardwareAddress)
+//        mSwiperControllerManager.setContext(context)
+//        mSwiperControllerManager.setSwiperControllerListener(swiperListener)
+//        mSwiperControllerManager.setSwiperType(SwiperType.IDTech)
+//        mSwiperControllerManager.connectToDevice()
+//
+//        api.setEndPoint("https://fts.cardconnect.com:6443")
+//        mSwiperControllerManager.setContext(context)
+//    }
 
     fun connect(device: BluetoothDevice) {
         // Cancel discovery because it otherwise slows down the connection.
         bluetoothAdapter?.cancelDiscovery()
-
+//        connectApi(device)
         hidDevice?.connect(device) ?: run {
             // Initialize latch to wait for service to be connected.
             latch = CountDownLatch(1)
@@ -213,14 +299,16 @@ class BluetoothController(private val context: Context) {
                 ).show()
 
                 CoroutineScope(Dispatchers.IO).launch {
-                    latch.await()
+                    withContext(Dispatchers.IO) {
+                        latch.await()
+                    }
                     hidDevice?.connect(device)
                 }
             }
         }
     }
 
-    fun disconnect(): Boolean {
+    private fun disconnect(): Boolean {
         return hostDevice?.let {
             hidDevice?.disconnect(it)
         } ?: false
@@ -233,6 +321,6 @@ fun BluetoothDevice.removeBond() {
     try {
         javaClass.getMethod("removeBond").invoke(this)
     } catch (e: Exception) {
-        Log.e("BluetoothDevice", "Removing bond with $address has failed.", e)
+        Timber.tag("BluetoothDevice").e(e, "Removing bond with $address has failed.")
     }
 }

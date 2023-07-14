@@ -1,12 +1,11 @@
-package tunanh.test_app
+package tunanh.test_app.bluetooth
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothProfile
 import android.content.Intent
-import android.os.Build
-import android.util.Log
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -25,7 +24,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import tunanh.test_app.bluetooth.removeBond
+import timber.log.Timber
+import tunanh.test_app.DeviceInfo
+import tunanh.test_app.DeviceInfoDialog
+import tunanh.test_app.DevicesViewModel
+import tunanh.test_app.PreferenceStore
+import tunanh.test_app.R
+import tunanh.test_app.SystemBroadcastReceiver
+import tunanh.test_app.Utils
+import tunanh.test_app.rememberPreferenceDefault
+import tunanh.test_app.tooltip
 import tunanh.test_app.ui.ConfirmDialog
 import tunanh.test_app.ui.LoadingDialog
 import tunanh.test_app.ui.rememberDialogState
@@ -45,12 +53,7 @@ fun Devices() = with(viewModel<DevicesViewModel>()) {
             TopAppBar(
                 title = { Text(stringResource(R.string.devices)) },
                 actions = {
-//                    IconButton(
-//                        onClick = { navigation.navigate(Routes.Main) },
-//                        modifier = Modifier.tooltip(stringResource(R.string.skip))
-//                    ) {
-//                        Icon(Icons.Default.East, "Skip")
-//                    }
+
                     IconButton(
                         onClick = {
                             if (!isScanning) refresh(controller)
@@ -66,7 +69,7 @@ fun Devices() = with(viewModel<DevicesViewModel>()) {
                             "Refresh"
                         )
                     }
-                    IconButton(onClick = { (context as MainActivity).finishAfterTransition() }) {
+                    IconButton(onClick = { (context as BluetoothActivity).finishAfterTransition() }) {
                         Icon(imageVector = Icons.Filled.ExitToApp, contentDescription = "exit")
                     }
                 },
@@ -150,7 +153,7 @@ fun DevicesViewModel.BroadcastListener() {
     }
 
     SystemBroadcastReceiver(BluetoothDevice.ACTION_FOUND) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        if (Utils.isTIRAMISU()) {
             it?.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE, BluetoothDevice::class.java)
         } else {
             @Suppress("DEPRECATION") it?.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
@@ -161,14 +164,83 @@ fun DevicesViewModel.BroadcastListener() {
         }
     }
 }
+//private val mSwiperControllerManager by lazy {  SwiperControllerManager().getInstance()}
+//
+//private val swiperListener = object : SwiperControllerListener {
+//    override fun onTokenGenerated(p0: CCConsumerAccount?, p1: CCConsumerError?) {
+//        Timber.e("onTokenGenerated " + p0?.name)
+//    }
+//
+//    override fun onError(p0: SwiperError?) {
+//        Timber.e("onError " + p0?.exceptionMessage)
+//    }
+//
+//    override fun onSwiperReadyForCard() {
+//        Timber.e("onSwiperReadyForCard")
+//    }
+//
+//    override fun onSwiperConnected() {
+//        Timber.e("onSwiperConnected")
+//    }
+//
+//    override fun onSwiperDisconnected() {
+//        Timber.e("onSwiperDisconnected")
+//    }
+//
+//    override fun onBatteryState(p0: BatteryState?) {
+//        Timber.e("onBatteryState")
+//    }
+//
+//    override fun onStartTokenGeneration() {
+//        Timber.e("onStartTokenGeneration")
+//    }
+//
+//    override fun onLogUpdate(p0: String?) {
+//        Timber.e("onLogUpdate $p0")
+//    }
+//
+//    override fun onDeviceConfigurationUpdate(p0: String?) {
+//        Timber.e("onDeviceConfigurationUpdate $p0")
+//    }
+//
+//    override fun onConfigurationProgressUpdate(p0: Double) {
+//        Timber.e("onConfigurationProgressUpdate $p0")
+//    }
+//
+//    override fun onConfigurationComplete(p0: Boolean) {
+//        Timber.e("onConfigurationComplete $p0")
+//    }
+//
+//    override fun onTimeout() {
+//        Timber.e("onTimeout")
+//    }
+//
+//    override fun onLCDDisplayUpdate(p0: String?) {
+//        Timber.e("onLCDDisplayUpdate $p0")
+//    }
+//
+//    override fun onRemoveCardRequested() {
+//        Timber.e("onRemoveCardRequested")
+//    }
+//
+//    override fun onCardRemoved() {
+//        Timber.e("onCardRemoved")
+//    }
+//
+//    override fun onDeviceBusy() {
+//        Timber.e("onDeviceBusy")
+//    }
+//
+//}
 
 
 @SuppressLint("MissingPermission")
 @Composable
 fun DevicesViewModel.DeviceList(
-    onConnect: (BluetoothDevice) -> Unit
+    onConnect: (BluetoothDevice) -> Unit,
 ) {
     val showUnnamed by rememberPreferenceDefault(PreferenceStore.SHOW_UNNAMED)
+//    val context = LocalContext.current
 
     LazyColumn(
         Modifier
@@ -199,11 +271,11 @@ fun DevicesViewModel.DeviceList(
             with(foundDevices.filter { showUnnamed || it.name != null }) {
                 if (isEmpty() || !isBluetoothEnabled) {
                     item {
-                        RequireLocationPermission {
+//                        RequireLocationPermission {
                             if (!isScanning) {
                                 Text(stringResource(R.string.swipe_refresh))
                             }
-                        }
+//                        }
                     }
                 } else {
                     items(this) { d ->
@@ -212,7 +284,7 @@ fun DevicesViewModel.DeviceList(
                                 onConnect(d)
                             }
                         }.onFailure {
-                            Log.e("DeviceList", "Failed to get device info", it)
+                            Timber.tag("DeviceList").e(it, "Failed to get device info")
                         }
                     }
                 }
@@ -234,11 +306,12 @@ fun DevicesViewModel.DeviceList(
             } else {
                 items(pairedDevices) {
                     runCatching {
-                        DeviceCard(it) {
-                            onConnect(it)
-                        }
+                        DeviceCard(it, onClick = {
+
+//                            mSwiperControllerManager.setSwiperType(SwiperType.IDTech)
+                        })
                     }.onFailure {
-                        Log.e("DeviceList", "Failed to get device info", it)
+                        Timber.e(it, "Failed to get device info")
                     }
                 }
             }
@@ -256,14 +329,18 @@ fun DeviceCard(
 ) {
     val infoDialog = rememberDialogState()
     val confirmDialog = rememberDialogState()
+//    val controller= LocalController.current
 
     val deviceName = device.name ?: ""
 
     ElevatedCard(
         onClick,
         shape = MaterialTheme.shapes.small,
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
     ) {
+//        controller.connectApi(device)
         Row(Modifier.padding(4.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(Modifier.size(40.dp), contentAlignment = Alignment.Center) {
                 Icon(

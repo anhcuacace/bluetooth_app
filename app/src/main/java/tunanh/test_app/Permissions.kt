@@ -37,6 +37,7 @@ fun RequiresBluetoothPermission(
         permissions.add(android.Manifest.permission.BLUETOOTH)
         permissions.add(android.Manifest.permission.BLUETOOTH_ADMIN)
     }
+//    permissions.add(android.Manifest.permission.RECORD_AUDIO)
 
     val bluetoothPermission = rememberMultiplePermissionsState(permissions)
 

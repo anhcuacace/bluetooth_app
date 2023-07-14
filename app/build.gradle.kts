@@ -42,10 +42,16 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.4.3"
     }
+//    packagingOptions {
+//        resources {
+//            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+//        }
+//    }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -69,15 +75,21 @@ dependencies {
     implementation(libs.material)
     implementation(libs.material.icon)
     implementation(libs.datastore.preferences)
+//    implementation(files("/libs/boltsdk-release-3.0.86.aar"))
+    implementation(files("libs/database-connection-1.00.jar"))
+    implementation(files("libs/Universal_SDK_1.00.164_os.jar"))
     implementation("com.google.accompanist:accompanist-permissions:0.30.1")
     implementation("androidx.navigation:navigation-common-ktx:2.6.0")
     implementation("androidx.navigation:navigation-runtime-ktx:2.6.0")
     implementation("androidx.navigation:navigation-compose:2.6.0")
+    implementation(libs.timber)
+    implementation(platform("androidx.compose:compose-bom:2022.10.00"))
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.test.ext.junit)
     androidTestImplementation(libs.espresso.core)
     androidTestImplementation(platform(libs.compose.bom))
     androidTestImplementation(libs.ui.test.junit4)
+    androidTestImplementation(platform("androidx.compose:compose-bom:2022.10.00"))
     debugImplementation(libs.ui.tooling)
     debugImplementation(libs.ui.test.manifest)
 
