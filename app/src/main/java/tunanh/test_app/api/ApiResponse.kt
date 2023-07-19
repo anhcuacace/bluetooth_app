@@ -1,10 +1,12 @@
 package tunanh.test_app.api
 
-sealed class APiResponse<T> constructor(val loadingStatus: LoadingStatus) {
-    class DataLoading<T> : APiResponse<T>(LoadingStatus.Loading)
-    class DataIdle<T> : APiResponse<T>(LoadingStatus.Idle)
-    class DataError<T> : APiResponse<T>(LoadingStatus.Error)
-    data class DataSuccess<T>(val body: T) : APiResponse<T>(LoadingStatus.Success)
+sealed class ApiResponse<T> constructor(val loadingStatus: LoadingStatus) {
+    class DataLoading<T> : ApiResponse<T>(LoadingStatus.Loading)
+    class DataIdle<T> : ApiResponse<T>(LoadingStatus.Idle)
+    class DataError<T>(val code: Int? = null, val msg: String? = "") :
+        ApiResponse<T>(LoadingStatus.Error)
+
+    data class DataSuccess<T>(val body: T) : ApiResponse<T>(LoadingStatus.Success)
 }
 
 enum class LoadingStatus {

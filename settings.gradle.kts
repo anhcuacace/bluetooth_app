@@ -13,6 +13,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "test_app"
+rootProject.name = "CardPoint_demo"
 include(":app")
  

@@ -13,20 +13,20 @@ object ApiClient {
     private const val READ_TIMEOUT = 10L
     private const val WRITE_TIMEOUT = 10L
     private const val site = "isv-uat"
-    private const val URL = "https://$site.cardconnect.com/cardconnect/rest"
-    private const val CsURL = "https://$site.cardconnect.com/cardsecure/api/v1/ccn/tokenize"
+    private const val URL = "https://$site.cardconnect.com/cardconnect/rest/"
+    const val CsURL = "https://$site.cardconnect.com/cardsecure/api/v1/ccn/tokenize/"
     const val Merchid = "800000009175"
     const val Authorization = "Basic dGVzdGluZzp0ZXN0aW5nMTIz"
 
-    private val retrofit: ((String) -> Retrofit) = {
 
+    fun getCardPointService(): CardPoint =
         Retrofit.Builder().addConverterFactory(GsonConverterFactory.create())
             .client(
                 OkHttpClient.Builder()
                     .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
                     .addInterceptor { chain ->
                         val request = chain.request().newBuilder()
-                            .addHeader("Authorization", "Basic dGVzdGluZzp0ZXN0aW5nMTIz")
+                            .addHeader("Authorization", Authorization)
                             .addHeader("Content-Type", "application/json")
                             .build()
                         chain.proceed(request)
@@ -36,14 +36,27 @@ object ApiClient {
                     .connectTimeout(CONNECT_TIMEOUT, TimeUnit.SECONDS)
                     .build()
             )
-            .baseUrl(it)
-            .build()
-    }
+            .baseUrl(URL)
+            .build().create()
 
 
-    fun getCardPointService(): CardPoint = retrofit(URL).create()
-
-
-    fun getCsCardPointService(): Cs = retrofit(CsURL).create()
+    fun getCsCardPointService(): Cs =
+        Retrofit.Builder().addConverterFactory(GsonConverterFactory.create())
+            .client(
+                OkHttpClient.Builder()
+                    .addInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
+                    .addInterceptor { chain ->
+                        val request = chain.request().newBuilder()
+                            .addHeader("Content-Type", "application/json")
+                            .build()
+                        chain.proceed(request)
+                    }
+                    .readTimeout(READ_TIMEOUT, TimeUnit.SECONDS)
+                    .writeTimeout(WRITE_TIMEOUT, TimeUnit.SECONDS)
+                    .connectTimeout(CONNECT_TIMEOUT, TimeUnit.SECONDS)
+                    .build()
+            )
+            .baseUrl(CsURL)
+            .build().create()
 
 }

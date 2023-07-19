@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import tunanh.test_app.R
 import tunanh.test_app.ui.theme.Typography
 
@@ -365,7 +366,7 @@ fun LoadingDialog(
     onDismiss: DialogState.() -> Unit = {}
 ) = with(dialogState) {
     if (openState) {
-        Dialog(onDismissRequest = { onDismiss() }) {
+        Dialog(onDismissRequest = { onDismiss() }, DialogProperties(dismissOnBackPress = true)) {
             Surface(
                 shape = MaterialTheme.shapes.extraLarge,
                 color = MaterialTheme.colorScheme.surface,

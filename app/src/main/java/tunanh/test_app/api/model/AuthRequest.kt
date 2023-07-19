@@ -7,6 +7,6 @@ data class AuthRequest(
     val expiry: String,
     val amount: String,
     val name: String,
-    val currency: String = "USA",
+    val currency: String = "USD",
     val merchid: String = ApiClient.Merchid,
 )

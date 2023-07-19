@@ -3,7 +3,6 @@ package tunanh.test_app.bluetooth
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
-import android.bluetooth.BluetoothProfile
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
@@ -26,6 +25,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import tunanh.test_app.DeviceInfo
@@ -40,6 +41,7 @@ import tunanh.test_app.pre.ConnectIdTech
 import tunanh.test_app.rememberPreferenceDefault
 import tunanh.test_app.tooltip
 import tunanh.test_app.ui.ConfirmDialog
+import tunanh.test_app.ui.DialogState
 import tunanh.test_app.ui.LoadingDialog
 import tunanh.test_app.ui.rememberDialogState
 import tunanh.test_app.ui.theme.Typography
@@ -104,11 +106,11 @@ fun DevicesViewModel.DeviceContent() {
         }
 
         val listener = controller.registerListener { _, state ->
-            dialogState.openState = when (state) {
-                BluetoothProfile.STATE_CONNECTING -> true
-                BluetoothProfile.STATE_DISCONNECTING -> true
-                else -> false // Only close if connected or fully disconnected
-            }
+//            dialogState.openState = when (state) {
+//                BluetoothProfile.STATE_CONNECTING -> true
+//                BluetoothProfile.STATE_DISCONNECTING -> true
+//                else -> false // Only close if connected or fully disconnected
+//            }
         }
 
         onDispose {
@@ -128,7 +130,7 @@ fun DevicesViewModel.DeviceContent() {
         rememberPullRefreshState(isRefreshing, { refresh(controller) })
 
     Box(Modifier.pullRefresh(pullRefreshState)) {
-        DeviceList(controller::connect)
+        DeviceList(dialogState)
 
         PullRefreshIndicator(
             isRefreshing,
@@ -169,6 +171,7 @@ fun DevicesViewModel.BroadcastListener() {
         }
     }
 }
+
 //private val mSwiperControllerManager by lazy {  SwiperControllerManager().getInstance()}
 //
 //private val swiperListener = object : SwiperControllerListener {
@@ -245,57 +248,15 @@ private fun gotoPayActivity(context: Context) {
     }
 }
 
-@SuppressLint("MissingPermission", "CoroutineCreationDuringComposition")
+
+@SuppressLint("MissingPermission")
 @Composable
-fun DevicesViewModel.DeviceList(
-    onConnect: (BluetoothDevice) -> Unit,
-) {
+fun DevicesViewModel.DeviceList(dialogState: DialogState) {
     val showUnnamed by rememberPreferenceDefault(PreferenceStore.SHOW_UNNAMED)
     val context = LocalContext.current
     val connect = ConnectIdTech.getInstance()
-    rememberCoroutineScope().launch {
-        connect.connectBlueToothState.collect { rc ->
-            if (rc != 0) {
-                if (rc == 1) Toast.makeText(context, "Invalid DEVICE_TYPE", Toast.LENGTH_SHORT)
-                    .show()
-                if (rc == 2) Toast.makeText(
-                    context,
-                    "Bluetooth LE is not supported on this device",
-                    Toast.LENGTH_SHORT
-                ).show()
-                if (rc == 3) Toast.makeText(
-                    context,
-                    "Bluetooth LE is not available",
-                    Toast.LENGTH_SHORT
-                ).show()
-                if (rc == 4) Toast.makeText(
-                    context,
-                    "Bluetooth LE is not enabled",
-                    Toast.LENGTH_SHORT
-                ).show()
-                if (rc == 5) Toast.makeText(
-                    context,
-                    "Device not paired. Please pair first",
-                    Toast.LENGTH_SHORT
-                ).show()
-            } else {
-//                gotoPayActivity(context)
-                Toast.makeText(
-                    context,
-                    "Failed. Please disconnect first.",
-                    Toast.LENGTH_SHORT
-                ).show()
-            }
-        }
 
-    }
-    rememberCoroutineScope().launch {
-        connect.availableConnect.collect {
-            if (it) {
-                gotoPayActivity(context)
-            }
-        }
-    }
+
     LazyColumn(
         Modifier
             .fillMaxSize()
@@ -326,18 +287,19 @@ fun DevicesViewModel.DeviceList(
                 if (isEmpty() || !isBluetoothEnabled) {
                     item {
 //                        RequireLocationPermission {
-                            if (!isScanning) {
-                                Text(stringResource(R.string.swipe_refresh))
-                            }
+                        if (!isScanning) {
+                            Text(stringResource(R.string.swipe_refresh))
+                        }
 //                        }
                     }
                 } else {
                     items(this) { d ->
                         runCatching {
-                            DeviceCard(d) {
+                            DeviceCard(d, {
 //                                onConnect(d)
+                                dialogState.openState = true
                                 connect.connectBlueTooth(d.address, context.applicationContext)
-                            }
+                            }, dialogState)
                         }.onFailure {
                             Timber.tag("DeviceList").e(it, "Failed to get device info")
                         }
@@ -363,8 +325,9 @@ fun DevicesViewModel.DeviceList(
                     runCatching {
                         DeviceCard(it, onClick = {
                             connect.connectBlueTooth(it.address, context.applicationContext)
+                            dialogState.openState = true
 //                            mSwiperControllerManager.setSwiperType(SwiperType.IDTech)
-                        })
+                        }, dialogState)
                     }.onFailure {
                         Timber.e(it, "Failed to get device info")
                     }
@@ -375,16 +338,77 @@ fun DevicesViewModel.DeviceList(
 }
 
 
-@SuppressLint("MissingPermission")
+@SuppressLint("MissingPermission", "CoroutineCreationDuringComposition")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DeviceCard(
     device: BluetoothDevice,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    dialogState: DialogState? = null,
 ) {
     val infoDialog = rememberDialogState()
     val confirmDialog = rememberDialogState()
-//    val controller= LocalController.current
+    val context = LocalContext.current
+    val connect = ConnectIdTech.getInstance()
+    //    val controller= LocalController.current
+    rememberCoroutineScope().launch {
+        connect.availableConnect.onEach {
+            Timber.e(dialogState?.openState.toString())
+            Timber.e((it && dialogState?.openState == true).toString())
+            if (it && dialogState?.openState == true) {
+                Timber.e("go")
+                dialogState.openState = false
+                gotoPayActivity(context)
+            }
+        }.launchIn(this)
+        connect.connectBlueToothState.onEach { rc ->
+            if (dialogState?.openState == true) {
+                if (rc != 0) {
+                    when (rc) {
+                        1 -> Toast.makeText(context, "Invalid DEVICE_TYPE", Toast.LENGTH_SHORT)
+                            .show()
+
+                        2 -> Toast.makeText(
+                            context,
+                            "Bluetooth LE is not supported on this device",
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                        3 -> Toast.makeText(
+                            context,
+                            "Bluetooth LE is not available",
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                        4 -> Toast.makeText(
+                            context,
+                            "Bluetooth LE is not enabled",
+                            Toast.LENGTH_SHORT
+                        ).show()
+
+                        5 -> Toast.makeText(
+                            context,
+                            "Device not paired. Please pair first",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+
+
+                } else {
+//                gotoPayActivity(context)
+
+//                    Toast.makeText(
+//                        context,
+//                        "Failed. Please disconnect first.",
+//                        Toast.LENGTH_SHORT
+//                    ).show()
+
+                }
+            }
+        }.launchIn(this)
+
+    }
+
 
     val deviceName = device.name ?: ""
 
@@ -487,7 +511,7 @@ fun DeviceDropdown(
     onConnect: () -> Unit = {},
     onInfo: () -> Unit = {},
     onRemove: () -> Unit = {},
-    icon: @Composable () -> Unit
+    icon: @Composable () -> Unit,
 ) {
     var showMenu by remember { mutableStateOf(false) }
 

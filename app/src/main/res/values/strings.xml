@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">test_app</string>
+    <string name="app_name">CardPoint_demo</string>
     <string name="title_activity_splash">SplashActivity</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="scanned_devices">Scanned devices</string>

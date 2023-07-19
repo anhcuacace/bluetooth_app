@@ -39,6 +39,9 @@ class ConnectIdTech private constructor() : OnReceiverListener, OnReceiverListen
     private val _availableConnect = MutableStateFlow(false)
     val availableConnect: StateFlow<Boolean> = _availableConnect
 
+    private val _disconnectState = MutableStateFlow(false)
+    val disconnectState: StateFlow<Boolean> = _disconnectState
+
     private val _connectBlueToothState = MutableStateFlow(-1)
     val connectBlueToothState: StateFlow<Int> = _connectBlueToothState
 
@@ -99,12 +102,13 @@ class ConnectIdTech private constructor() : OnReceiverListener, OnReceiverListen
         fwTool = FirmwareUpdateTool(this, context)
     }
 
-    private var canListener = true
-    fun listenerIdTech(context: Context) {
+    private var canListener = MutableStateFlow(true)
+    fun listenerIdTech(context: Context, _canListener: MutableStateFlow<Boolean>) {
+        this.canListener = _canListener
         if (device == null) {
             initializeReader(context)
         }
-        if (canListener) {
+        if (canListener.value) {
             device!!.device_startTransaction(
                 1.00,
                 0.00,
@@ -113,9 +117,9 @@ class ConnectIdTech private constructor() : OnReceiverListener, OnReceiverListen
                 null,
                 false
             )
-            canListener = true
+            canListener.value = true
             android.os.Handler(Looper.getMainLooper()).postDelayed({
-                canListener = true
+                canListener.value = true
             }, emvTimeout * 1000L)
 
         }
@@ -142,10 +146,15 @@ class ConnectIdTech private constructor() : OnReceiverListener, OnReceiverListen
                 }
                 output
             } ?: ""
-            val expirationDate = track2?.substring(
+            val expirationDatePart = track2?.substring(
                 track2.indexOf('=') + 1,
                 track2.indexOf('=') + 5
             ) ?: ""
+            val expirationDate: String = if (expirationDatePart.length >= 4) {
+                val month = expirationDatePart.substring(2, 4)
+                val year = expirationDatePart.substring(0, 2)
+                "$month$year"
+            } else ""
             Timber.e(track1)
             val name =
                 track1?.substring(track1.indexOf("^") + 1, track1.lastIndexOf("^"))?.trim() ?: ""
@@ -180,6 +189,7 @@ class ConnectIdTech private constructor() : OnReceiverListener, OnReceiverListen
 
     override fun deviceDisconnected() {
         Timber.e("deviceDisconnected")
+        _disconnectState.value = true
     }
 
     override fun timeout(p0: Int) {
