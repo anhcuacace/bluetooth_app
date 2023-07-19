@@ -2,7 +2,6 @@ package tunanh.test_app
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
-import android.os.Build
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.filled.*
@@ -34,7 +33,7 @@ fun DeviceInfoDialog(
                 Text(device.address)
             }
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            if (Utils.isAndroidR()) {
                 item {
                     Text(stringResource(R.string.alias) + ":", fontWeight = FontWeight.Bold)
                     Text(device.alias ?: "")

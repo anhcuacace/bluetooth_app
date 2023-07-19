@@ -47,4 +47,5 @@
     <string name="bluetooth">Bluetooth</string>
     <string name="usb">Usb</string>
     <string name="select_type_connection">Select connection type</string>
+    <string name="title_activity_pay">PayActivity</string>
 </resources>

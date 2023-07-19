@@ -4,7 +4,9 @@ import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothProfile
+import android.content.Context
 import android.content.Intent
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -24,6 +26,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import tunanh.test_app.DeviceInfo
 import tunanh.test_app.DeviceInfoDialog
@@ -32,6 +35,8 @@ import tunanh.test_app.PreferenceStore
 import tunanh.test_app.R
 import tunanh.test_app.SystemBroadcastReceiver
 import tunanh.test_app.Utils
+import tunanh.test_app.pay.PayActivity
+import tunanh.test_app.pre.ConnectIdTech
 import tunanh.test_app.rememberPreferenceDefault
 import tunanh.test_app.tooltip
 import tunanh.test_app.ui.ConfirmDialog
@@ -232,16 +237,65 @@ fun DevicesViewModel.BroadcastListener() {
 //    }
 //
 //}
+private fun gotoPayActivity(context: Context) {
+    context.apply {
+        if (this is BluetoothActivity) {
+            startActivity(Intent(this, PayActivity::class.java))
+        }
+    }
+}
 
-
-@SuppressLint("MissingPermission")
+@SuppressLint("MissingPermission", "CoroutineCreationDuringComposition")
 @Composable
 fun DevicesViewModel.DeviceList(
     onConnect: (BluetoothDevice) -> Unit,
 ) {
     val showUnnamed by rememberPreferenceDefault(PreferenceStore.SHOW_UNNAMED)
-//    val context = LocalContext.current
+    val context = LocalContext.current
+    val connect = ConnectIdTech.getInstance()
+    rememberCoroutineScope().launch {
+        connect.connectBlueToothState.collect { rc ->
+            if (rc != 0) {
+                if (rc == 1) Toast.makeText(context, "Invalid DEVICE_TYPE", Toast.LENGTH_SHORT)
+                    .show()
+                if (rc == 2) Toast.makeText(
+                    context,
+                    "Bluetooth LE is not supported on this device",
+                    Toast.LENGTH_SHORT
+                ).show()
+                if (rc == 3) Toast.makeText(
+                    context,
+                    "Bluetooth LE is not available",
+                    Toast.LENGTH_SHORT
+                ).show()
+                if (rc == 4) Toast.makeText(
+                    context,
+                    "Bluetooth LE is not enabled",
+                    Toast.LENGTH_SHORT
+                ).show()
+                if (rc == 5) Toast.makeText(
+                    context,
+                    "Device not paired. Please pair first",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else {
+//                gotoPayActivity(context)
+                Toast.makeText(
+                    context,
+                    "Failed. Please disconnect first.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
 
+    }
+    rememberCoroutineScope().launch {
+        connect.availableConnect.collect {
+            if (it) {
+                gotoPayActivity(context)
+            }
+        }
+    }
     LazyColumn(
         Modifier
             .fillMaxSize()
@@ -281,7 +335,8 @@ fun DevicesViewModel.DeviceList(
                     items(this) { d ->
                         runCatching {
                             DeviceCard(d) {
-                                onConnect(d)
+//                                onConnect(d)
+                                connect.connectBlueTooth(d.address, context.applicationContext)
                             }
                         }.onFailure {
                             Timber.tag("DeviceList").e(it, "Failed to get device info")
@@ -307,7 +362,7 @@ fun DevicesViewModel.DeviceList(
                 items(pairedDevices) {
                     runCatching {
                         DeviceCard(it, onClick = {
-
+                            connect.connectBlueTooth(it.address, context.applicationContext)
 //                            mSwiperControllerManager.setSwiperType(SwiperType.IDTech)
                         })
                     }.onFailure {

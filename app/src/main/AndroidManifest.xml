@@ -19,6 +19,8 @@
         android:required="true" /> <!-- <uses-feature -->
     <!-- android:name="android.hardware.location" -->
     <!-- android:required="false" /> -->
+    <uses-feature android:name="android.hardware.usb.host" />
+
     <uses-permission
         android:name="android.permission.BLUETOOTH"
         android:maxSdkVersion="30" />
@@ -38,9 +40,15 @@
         android:theme="@style/Theme.Test_app"
         tools:targetApi="31">
         <activity
+            android:name=".pay.PayActivity"
+            android:exported="false"
+            android:label="@string/title_activity_pay"
+            android:theme="@style/Theme.Test_app" />
+        <activity
             android:name=".pre.PreActivity"
             android:exported="true"
             android:label="@string/title_activity_pre"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.Test_app">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -55,7 +63,6 @@
             android:label="@string/title_activity_main"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.Test_app" />
-
 
         <service
             android:name=".bluetooth.BluetoothService"

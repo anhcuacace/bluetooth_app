@@ -39,7 +39,7 @@ class BluetoothController(private val context: Context) {
 
     private val bluetoothAdapter: BluetoothAdapter? by lazy { bluetoothManager.adapter }
 
-    private var deviceListener: MutableList<Listener> = mutableListOf()
+    private val deviceListener: MutableList<Listener> = mutableListOf()
 
     @Volatile
     private var hidDevice: BluetoothHidDevice? = null
@@ -190,96 +190,12 @@ class BluetoothController(private val context: Context) {
     fun cancelScan() {
         bluetoothAdapter?.cancelDiscovery()
     }
-//    private val mSwiperControllerManager by lazy {  SwiperControllerManager().getInstance()}
-//
-//    private val swiperListener = object : SwiperControllerListener {
-//        override fun onTokenGenerated(p0: CCConsumerAccount?, p1: CCConsumerError?) {
-//            Timber.e("onTokenGenerated " + p0?.name)
-//        }
-//
-//        override fun onError(p0: SwiperError?) {
-//            Timber.e("onError " + p0?.exceptionMessage)
-//        }
-//
-//        override fun onSwiperReadyForCard() {
-//            Timber.e("onSwiperReadyForCard")
-//        }
-//
-//        override fun onSwiperConnected() {
-//            Timber.e("onSwiperConnected")
-//        }
-//
-//        override fun onSwiperDisconnected() {
-//            Timber.e("onSwiperDisconnected")
-//        }
-//
-//        override fun onBatteryState(p0: BatteryState?) {
-//            Timber.e("onBatteryState")
-//        }
-//
-//        override fun onStartTokenGeneration() {
-//            Timber.e("onStartTokenGeneration")
-//        }
-//
-//        override fun onLogUpdate(p0: String?) {
-//            Timber.e("onLogUpdate $p0")
-//        }
-//
-//        override fun onDeviceConfigurationUpdate(p0: String?) {
-//            Timber.e("onDeviceConfigurationUpdate $p0")
-//        }
-//
-//        override fun onConfigurationProgressUpdate(p0: Double) {
-//            Timber.e("onConfigurationProgressUpdate $p0")
-//        }
-//
-//        override fun onConfigurationComplete(p0: Boolean) {
-//            Timber.e("onConfigurationComplete $p0")
-//        }
-//
-//        override fun onTimeout() {
-//            Timber.e("onTimeout")
-//        }
-//
-//        override fun onLCDDisplayUpdate(p0: String?) {
-//            Timber.e("onLCDDisplayUpdate $p0")
-//        }
-//
-//        override fun onRemoveCardRequested() {
-//            Timber.e("onRemoveCardRequested")
-//        }
-//
-//        override fun onCardRemoved() {
-//            Timber.e("onCardRemoved")
-//        }
-//
-//        override fun onDeviceBusy() {
-//            Timber.e("onDeviceBusy")
-//        }
-//
-//    }
-//
-//    fun connectApi(device: BluetoothDevice){
-//        val api = CCConsumer.getInstance().api
-//        val deviceName = device.name
-//        val deviceHardwareAddress = device.address // MAC address
-//        device.createBond()
-//        Timber.e("$deviceName -- $deviceHardwareAddress")
-//        api.connectToDevice(device, context)
-//        mSwiperControllerManager.setMACAddress(deviceHardwareAddress)
-//        mSwiperControllerManager.setContext(context)
-//        mSwiperControllerManager.setSwiperControllerListener(swiperListener)
-//        mSwiperControllerManager.setSwiperType(SwiperType.IDTech)
-//        mSwiperControllerManager.connectToDevice()
-//
-//        api.setEndPoint("https://fts.cardconnect.com:6443")
-//        mSwiperControllerManager.setContext(context)
-//    }
 
     fun connect(device: BluetoothDevice) {
         // Cancel discovery because it otherwise slows down the connection.
         bluetoothAdapter?.cancelDiscovery()
 //        connectApi(device)
+        device.createBond()
         hidDevice?.connect(device) ?: run {
             // Initialize latch to wait for service to be connected.
             latch = CountDownLatch(1)

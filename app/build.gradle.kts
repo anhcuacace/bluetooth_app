@@ -47,11 +47,6 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.4.3"
     }
-//    packagingOptions {
-//        resources {
-//            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-//        }
-//    }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -82,6 +77,13 @@ dependencies {
     implementation("androidx.navigation:navigation-common-ktx:2.6.0")
     implementation("androidx.navigation:navigation-runtime-ktx:2.6.0")
     implementation("androidx.navigation:navigation-compose:2.6.0")
+    implementation(libs.coroutines.core)
+//    implementation(libs.coroutines.flow)
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.gson)
+    implementation(libs.okhttp3)
+    implementation(libs.logging.interceptor)
+    implementation(libs.gson)
     implementation(libs.timber)
     implementation(platform("androidx.compose:compose-bom:2022.10.00"))
     testImplementation(libs.junit)
@@ -90,6 +92,7 @@ dependencies {
     androidTestImplementation(platform(libs.compose.bom))
     androidTestImplementation(libs.ui.test.junit4)
     androidTestImplementation(platform("androidx.compose:compose-bom:2022.10.00"))
+
     debugImplementation(libs.ui.tooling)
     debugImplementation(libs.ui.test.manifest)
 
