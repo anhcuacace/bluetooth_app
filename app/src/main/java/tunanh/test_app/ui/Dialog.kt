@@ -1,9 +1,12 @@
 package tunanh.test_app.ui
 
+import android.os.Handler
+import android.os.Looper
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
@@ -271,61 +274,6 @@ fun InfoDialog(
     }
 }
 
-//@Composable
-//fun ConfirmResetDialog(
-//    dialogState: DialogState,
-//    title: String,
-//    onReset: () -> Unit,
-//    onDismiss: DialogState.() -> Unit = {},
-//    onConfirm: DialogState.() -> Unit,
-//    content: @Composable () -> Unit,
-//) = with(dialogState) {
-//    val confirmReset = rememberDialogState()
-//
-//    if (openState) {
-//        AlertDialog(
-//            onDismissRequest = { onDismiss() },
-//            title = {
-//                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
-//                    Text(title)
-//                    IconButton(
-//                        onClick = { confirmReset.open() },
-//                        modifier = Modifier
-//                            .size(48.dp)
-//                            .align(Alignment.CenterEnd)
-//                            .tooltip(stringResource(R.string.reset))
-//                    ) {
-//                        Icon(Icons.Filled.Restore, "Reset $title to default", Modifier.size(28.dp))
-//                    }
-//                }
-//            },
-//            text = content,
-//            confirmButton = {
-//                TextButton(
-//                    onClick = { onConfirm() }
-//                ) {
-//                    Text(stringResource(android.R.string.ok))
-//                }
-//            },
-//            dismissButton = {
-//                TextButton(
-//                    onClick = { onDismiss() }
-//                ) {
-//                    Text(stringResource(android.R.string.cancel))
-//                }
-//            },
-//        )
-//    }
-//
-//    ConfirmDialog(confirmReset, stringResource(R.string.reset_default),
-//        onConfirm = {
-//            onReset()
-//            close()
-//        }
-//    ) {
-//        Text(stringResource(R.string.reset_default_desc))
-//    }
-//}
 
 @Composable
 fun ConfirmDialog(
@@ -365,8 +313,14 @@ fun LoadingDialog(
     desc: String,
     onDismiss: DialogState.() -> Unit = {}
 ) = with(dialogState) {
+    var visibilityCancel = remember {
+        false
+    }
     if (openState) {
         Dialog(onDismissRequest = { onDismiss() }, DialogProperties(dismissOnBackPress = true)) {
+            Handler(Looper.getMainLooper()).postDelayed({
+                visibilityCancel = true
+            }, 10000)
             Surface(
                 shape = MaterialTheme.shapes.extraLarge,
                 color = MaterialTheme.colorScheme.surface,
@@ -380,7 +334,11 @@ fun LoadingDialog(
                     verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
                     Text(title, style = Typography.headlineMedium)
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
                         CircularProgressIndicator()
                         Spacer(Modifier.width(16.dp))
                         Text(stringResource(R.string.please_wait))
@@ -390,6 +348,16 @@ fun LoadingDialog(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         style = MaterialTheme.typography.bodyMedium
                     )
+                    if (visibilityCancel) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            TextButton(onClick = { openState = false }) {
+                                Text(text = "cancel")
+                            }
+                        }
+                    }
                 }
             }
         }

@@ -11,12 +11,7 @@ import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import timber.log.Timber
 import tunanh.test_app.PreferenceStore
 import tunanh.test_app.R
@@ -131,8 +126,6 @@ class BluetoothController(private val context: Context) {
         }
     }
 
-//    val currentDevice: BluetoothDevice?
-//        get() = hostDevice
 
     val bluetoothEnabled: Boolean
         get() = bluetoothAdapter?.isEnabled ?: false
@@ -191,38 +184,6 @@ class BluetoothController(private val context: Context) {
         bluetoothAdapter?.cancelDiscovery()
     }
 
-    fun connect(device: BluetoothDevice) {
-        // Cancel discovery because it otherwise slows down the connection.
-        bluetoothAdapter?.cancelDiscovery()
-//        connectApi(device)
-        device.createBond()
-        hidDevice?.connect(device) ?: run {
-            // Initialize latch to wait for service to be connected.
-            latch = CountDownLatch(1)
-
-            // Try to register proxy.
-            if (!runBlocking { register() }) {
-                Toast.makeText(
-                    context,
-                    context.getString(R.string.bt_proxy_error),
-                    Toast.LENGTH_SHORT
-                ).show()
-            } else {
-                Toast.makeText(
-                    context,
-                    context.getString(R.string.proxy_waiting),
-                    Toast.LENGTH_SHORT
-                ).show()
-
-                CoroutineScope(Dispatchers.IO).launch {
-                    withContext(Dispatchers.IO) {
-                        latch.await()
-                    }
-                    hidDevice?.connect(device)
-                }
-            }
-        }
-    }
 
     private fun disconnect(): Boolean {
         return hostDevice?.let {

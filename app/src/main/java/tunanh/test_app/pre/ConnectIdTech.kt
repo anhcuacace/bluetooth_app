@@ -117,7 +117,7 @@ class ConnectIdTech private constructor() : OnReceiverListener, OnReceiverListen
                 null,
                 false
             )
-            canListener.value = true
+            canListener.value = false
             android.os.Handler(Looper.getMainLooper()).postDelayed({
                 canListener.value = true
             }, emvTimeout * 1000L)
@@ -177,7 +177,7 @@ class ConnectIdTech private constructor() : OnReceiverListener, OnReceiverListen
     override fun emvTransactionData(p0: IDTEMVData?) {
         Timber.e("emvTransactionData")
         p0?.apply {
-            val data = unencryptedTags["57"]
+            val data = unencryptedTags["57"] ?: ByteArray(0)
             Timber.e(Common.getHexStringFromBytes(data))
         }
     }

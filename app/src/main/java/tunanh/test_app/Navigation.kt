@@ -23,7 +23,6 @@ import tunanh.test_app.bluetooth.Devices
 
 object Routes {
     const val Devices = "Devices"
-    const val Main = "Main"
 }
 
 val LocalNavigation = staticCompositionLocalOf<NavHostController> {
@@ -67,39 +66,7 @@ fun NavGraph() {
                     }
                 }
             }
-            composable(Routes.Main) {
-                Main()
-            }
-
-//            composable(Routes.Main) {
-//                // Disconnect from device and navigate back to devices list
-//                val onBack: () -> Unit = {
-//                    controller.disconnect()
-//                    if (!navController.navigateUp()) {
-//                        navController.popBackStack()
-//                        navController.navigate(Routes.Devices)
-//                    }
-//                }
-//
-////                Scanner(controller.currentDevice, onBack) {
-////                    scope.launch {
-////                        controller.sendString(it)
-////                    }
-////                }
-//
-//                BackHandler(onBack = onBack)
-//            }
         }
     }
 
-    // Listen for changes in the current device
-//    LaunchedEffect(controller.currentDevice) {
-//        // When connected to a device, navigate to the scanner
-//        if (controller.currentDevice != null) {
-//            // Single-top is used to avoid creating multiple instances of the scanner
-//            navController.navigate(Routes.Main) {
-//                launchSingleTop = true
-//            }
-//        }
-//    }
 }

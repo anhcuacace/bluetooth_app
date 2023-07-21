@@ -16,7 +16,7 @@ object ApiClient {
     private const val URL = "https://$site.cardconnect.com/cardconnect/rest/"
     const val CsURL = "https://$site.cardconnect.com/cardsecure/api/v1/ccn/tokenize/"
     const val Merchid = "800000009175"
-    const val Authorization = "Basic dGVzdGluZzp0ZXN0aW5nMTIz"
+    private const val Authorization = "Basic dGVzdGluZzp0ZXN0aW5nMTIz"
 
 
     fun getCardPointService(): CardPoint =

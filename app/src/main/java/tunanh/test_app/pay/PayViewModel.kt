@@ -37,6 +37,9 @@ class PayViewModel : ViewModel() {
     private val _messageState = MutableStateFlow("")
     val messageState: StateFlow<String> = _messageState
 
+    private val _response = MutableStateFlow("")
+    val response: StateFlow<String> = _response
+
     val disconnectState = connect.disconnectState
 
     private val repository by lazy { CallApiRepository.getInstance() }
@@ -50,6 +53,7 @@ class PayViewModel : ViewModel() {
         MutableStateFlow<ApiResponse<CaptureResponse>>(ApiResponse.DataIdle())
 
     fun listener(context: Context) {
+        _response.value = ""
         connect.listenerIdTech(context, _canListener)
     }
 
@@ -67,8 +71,7 @@ class PayViewModel : ViewModel() {
         getData: suspend () -> ApiResponse<I>,
         outStatus: MutableStateFlow<ApiResponse<O>>,
         action: suspend (ApiResponse<I>) -> ApiResponse<O>,
-
-        ) {
+    ) {
         var error = false
         viewModelScope.launch(Dispatchers.IO) {
             do {
@@ -113,6 +116,7 @@ class PayViewModel : ViewModel() {
 //            } else {
 //
 //            }
+            _response.value = ""
             waitingSussesAndLoadData(
                 tokenState,
                 { getToken() },
@@ -147,10 +151,10 @@ class PayViewModel : ViewModel() {
 
         cardDataState.onEach {
             Timber.e(it.toString())
+            _canListener.value = true
             if (it.cardNumber.isNotEmpty()) {
                 loadData(tokenState) { getToken() }
             }
-
         }.launchIn(viewModelScope)
 
         authState.onEach {
@@ -164,23 +168,39 @@ class PayViewModel : ViewModel() {
                     { capture ->
                         capture(capture)
                     })
+                _response.value += "\n\nauth: ${it.body}"
             } else if ((it is ApiResponse.DataError) && !error) {
 
                 loadData(authState) {
                     putAuth(tokenState.value, amount)
                 }
                 error = true
+                _response.value += "\n" +
+                        "\nauth error"
             } else if (it is ApiResponse.DataLoading) {
                 _messageState.value = "authing"
             }
         }.launchIn(viewModelScope)
         tokenState.onEach {
             Timber.e(it.toString())
-            if (it is ApiResponse.DataLoading) {
-                _messageState.value = "tokenizing"
-            } else if (it is ApiResponse.DataError) {
-                _messageState.value = "error token ${it.code} ${it.msg.orEmpty()}"
-                Timber.e("error token ${it.code} ${it.msg.orEmpty()}")
+            when (it) {
+                is ApiResponse.DataLoading -> {
+                    _messageState.value = "tokenizing"
+                }
+
+                is ApiResponse.DataError -> {
+                    _messageState.value = "error token ${it.code} ${it.msg.orEmpty()}"
+                    Timber.e("error token ${it.code} ${it.msg.orEmpty()}")
+                    _response.value += "\n" +
+                            "\ntoken error"
+                }
+
+                is ApiResponse.DataSuccess -> {
+                    _response.value += "\n" +
+                            "\ntoken: ${it.body}"
+                }
+
+                else -> {}
             }
         }.launchIn(viewModelScope)
         captureState.onEach {
@@ -188,6 +208,8 @@ class PayViewModel : ViewModel() {
             if (it is ApiResponse.DataSuccess) {
                 _messageState.value = "susses ${it.body.amount}"
                 canPay.value = true
+                _response.value += "\n" +
+                        "\nsusses: ${it.body}"
             } else if (it is ApiResponse.DataLoading) {
                 _messageState.value = "capturing"
             }
