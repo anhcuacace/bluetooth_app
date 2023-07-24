@@ -148,8 +148,9 @@ class PayViewModel : ViewModel() {
 
     init {
         connect.setSwipeListener(_cardDataState)
-
+        var error = false
         cardDataState.onEach {
+            error = false
             Timber.e(it.toString())
             _canListener.value = true
             if (it.cardNumber.isNotEmpty()) {
@@ -159,7 +160,6 @@ class PayViewModel : ViewModel() {
 
         authState.onEach {
             Timber.e(it.toString())
-            var error = false
             if (it is ApiResponse.DataSuccess) {
                 waitingSussesAndLoadData(
                     authState,
@@ -170,7 +170,6 @@ class PayViewModel : ViewModel() {
                     })
                 _response.value += "\n\nauth: ${it.body}"
             } else if ((it is ApiResponse.DataError) && !error) {
-
                 loadData(authState) {
                     putAuth(tokenState.value, amount)
                 }
